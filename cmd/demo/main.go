@@ -2,9 +2,15 @@ package main
 
 import (
 	"context"
-	"ewallet/modules/share"
-	"ewallet/modules/transaction"
-	"ewallet/modules/wallet"
+	service2 "ewallet/modules/bank/service"
+	"ewallet/modules/share/dbclient"
+	infra2 "ewallet/modules/transaction/infra"
+	service3 "ewallet/modules/transaction/service"
+	"ewallet/modules/transaction/statemachine/controller"
+	"ewallet/modules/transaction/statemachine/state"
+	"ewallet/modules/wallet/infra"
+	"ewallet/modules/wallet/service"
+	"fmt"
 	"github.com/caarlos0/env"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -26,32 +32,66 @@ func main()  {
 	if err != nil {
 		panic(err)
 	}
+	defer transDB.Close()
 	walletDB, err := sqlx.Connect("mysql", conf.WalletDatasource)
 	if err != nil {
 		panic(err)
 	}
-	
-	transIDChannel := make(chan int64, 100)
-	publisher := NewPublisher(transIDChannel)
-	consumer := NewConsumer(transIDChannel, buildTransactionHandler(transDB, walletDB))
+	defer transDB.Close()
 
-	walletRepo := wallet.NewRepository(walletDB)
+	transferChannel := make(chan int64, 100)
+	depositChannel := make(chan int64, 100)
+	withdrawChannel := make(chan int64, 100)
+	defer close(transferChannel)
+	defer close(depositChannel)
+	defer close(withdrawChannel)
+	publisher := NewPublisher(transferChannel, depositChannel, withdrawChannel)
+	transferConsumer := NewConsumer(transferChannel, buildTransferHandler(transDB, walletDB))
+	depositConsumer := NewConsumer(depositChannel, buildDepositHandler(transDB, walletDB))
+	withdrawConsumer := NewConsumer(withdrawChannel, buildWithdrawHandler(transDB, walletDB))
+
+	walletRepo := infra.NewRepository(walletDB)
 	transactionService := buildTransactionService(conf.TransactionDatasource, walletRepo, publisher)
-	walletService := wallet.NewService(walletRepo, transactionService)
-	
-	consumer.Run(context.Background())
+	walletService := service.NewService(walletRepo, transactionService)
 
+	transferConsumer.Run(context.Background())
+	depositConsumer.Run(context.Background())
+	withdrawConsumer.Run(context.Background())
+
+	fmt.Println("running at localhost:8080")
 	startServer(walletService)
 }
 
-func buildTransactionService(datasource string, walletRepo transaction.WalletRepository, publisher transaction.Publisher) transaction.Service {
+func buildTransactionService(datasource string, walletRepo service3.WalletRepository, publisher service3.Publisher) service3.Service {
 	transDB, err := sqlx.Connect("mysql", datasource)
 	if err != nil {
 		panic(err)
 	}
-	return transaction.NewService(transaction.NewRepository(transDB, publisher), walletRepo)
+	return service3.NewService(
+		infra2.NewRepository(transDB),
+		publisher)
 }
 
-func buildTransactionHandler(transactionDB ,assetDB share.DB) Handler {
-	return transaction.NewStateMachine(transactionDB, assetDB, transaction.NewStateHandlerGetter(assetDB))
+func buildTransferHandler(transactionDB ,assetDB dbclient.DB) Handler {
+	bankService := service2.NewBank()
+	return controller.NewStateMachineHandler(
+		transactionDB,
+		state.NewStateHandlerGetter(assetDB, bankService,  bankService,  bankService),
+		controller.NewTransferStateController())
+}
+
+func buildDepositHandler(transactionDB ,assetDB dbclient.DB) Handler {
+	bankService := service2.NewBank()
+	return controller.NewStateMachineHandler(
+		transactionDB,
+		state.NewStateHandlerGetter(assetDB, bankService,  bankService,  bankService),
+		controller.NewDepositStateController())
+}
+
+func buildWithdrawHandler(transactionDB ,assetDB dbclient.DB) Handler {
+	bankService := service2.NewBank()
+	return controller.NewStateMachineHandler(
+		transactionDB,
+		state.NewStateHandlerGetter(assetDB, bankService,  bankService,  bankService),
+		controller.NewWithdrawStateController())
 }

@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"ewallet/modules/transaction/statemachine/controller"
+	"ewallet/modules/transaction/statemachine/types"
 )
 
 type (
 	Handler interface {
-		Handle(ctx context.Context, transID int64) error
+		Handle(ctx context.Context, transID int64) (types.Status, error)
 	}
 	consumer struct {
 		transChannel chan int64
@@ -24,7 +26,10 @@ func NewConsumer(transChannel chan int64, handler Handler) *consumer  {
 func (c *consumer) Run(ctx context.Context) {
 	go func() {
 		for transID := range c.transChannel {
-			c.handler.Handle(ctx, transID)
+			status, err := c.handler.Handle(ctx, transID)
+			if err != nil || status != controller.CompleteStatus {
+				c.transChannel <- transID
+			}
 		}
 	}()
 }

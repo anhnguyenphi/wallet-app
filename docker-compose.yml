@@ -1,0 +1,42 @@
+version: '3.1'
+
+services:
+
+  walletapp:
+    restart: always
+    build: .
+    ports:
+      - 8080:8080
+    environment:
+      TRANSACTION_DATASOURCE: "test:test@(transactiondb:3306)/transaction"
+      WALLET_DATASOURCE: "test:test@(walletdb:3306)/wallet"
+    depends_on:
+      - transactiondb
+      - walletdb
+    links:
+      - transactiondb
+      - walletdb
+
+  transactiondb:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_DATABASE: "transaction"
+      MYSQL_USER: "test"
+      MYSQL_PASSWORD: "test"
+    ports:
+      - 3306:3306
+    volumes:
+      - ./cmd/demo/transaction.sql:/docker-entrypoint-initdb.d/transaction.sql
+
+  walletdb:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_DATABASE: "wallet"
+      MYSQL_USER: "test"
+      MYSQL_PASSWORD: "test"
+    ports:
+      - 3307:3306
+    volumes:
+      - ./cmd/demo/wallet.sql:/docker-entrypoint-initdb.d/wallet.sql
