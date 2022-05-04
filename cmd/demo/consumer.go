@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"ewallet/modules/transaction/statemachine/controller"
 	"ewallet/modules/transaction/statemachine/types"
 )
 
@@ -27,7 +26,7 @@ func (c *consumer) Run(ctx context.Context) {
 	go func() {
 		for transID := range c.transChannel {
 			status, err := c.handler.Handle(ctx, transID)
-			if err != nil || status != controller.CompleteStatus {
+			if err != nil || status != types.CompleteStatus {
 				c.transChannel <- transID
 			}
 		}

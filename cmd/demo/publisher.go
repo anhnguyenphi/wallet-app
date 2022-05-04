@@ -25,9 +25,9 @@ func NewPublisher(transChannel chan int64, depositChannel chan int64, withdrawCh
 
 func (c *transactionChannel) Publish(ctx context.Context, transType types.Type, transId int64) error {
 	switch transType {
-	case controller.DepositType: c.depositChannel <- transId
-	case controller.TransferType: c.transferChannel <- transId
-	case controller.WithdrawType: c.withdrawChannel <- transId
+	case types.DepositType: c.depositChannel <- transId
+	case types.TransferType: c.transferChannel <- transId
+	case types.WithdrawType: c.withdrawChannel <- transId
 	}
 	return nil
 }

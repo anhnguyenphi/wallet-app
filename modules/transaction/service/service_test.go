@@ -107,8 +107,8 @@ func TestServiceImpl_Deposit(t *testing.T) {
 			repo: func() infra.Repository {
 				m := &infra_mocks.Repository{}
 				m.On("Create", mock.Anything, types.TransDAO{
-					FromWalletID: sql.NullInt64{Int64: 1},
-					ToCardID:     sql.NullInt64{Int64: 1},
+					FromCardID: sql.NullInt64{Int64: 1},
+					ToWalletID:     sql.NullInt64{Int64: 1},
 					Amount:       "100",
 					Currency:     "USD",
 					Type:         types.DepositType,
@@ -127,8 +127,8 @@ func TestServiceImpl_Deposit(t *testing.T) {
 			repo: func() infra.Repository {
 				m := &infra_mocks.Repository{}
 				m.On("Create", mock.Anything, types.TransDAO{
-					FromWalletID: sql.NullInt64{Int64: 1},
-					ToCardID:     sql.NullInt64{Int64: 1},
+					FromCardID: sql.NullInt64{Int64: 1},
+					ToWalletID:     sql.NullInt64{Int64: 1},
 					Amount:       "100",
 					Currency:     "USD",
 					Type:         types.DepositType,
@@ -147,8 +147,8 @@ func TestServiceImpl_Deposit(t *testing.T) {
 			repo: func() infra.Repository {
 				m := &infra_mocks.Repository{}
 				m.On("Create", mock.Anything, types.TransDAO{
-					FromWalletID: sql.NullInt64{Int64: 1},
-					ToCardID:     sql.NullInt64{Int64: 1},
+					FromCardID: sql.NullInt64{Int64: 1},
+					ToWalletID:     sql.NullInt64{Int64: 1},
 					Amount:       "100",
 					Currency:     "USD",
 					Type:         types.DepositType,
@@ -190,7 +190,7 @@ func TestServiceImpl_Transfer(t *testing.T) {
 				m := &infra_mocks.Repository{}
 				m.On("Create", mock.Anything, types.TransDAO{
 					FromWalletID: sql.NullInt64{Int64: 1},
-					ToCardID:     sql.NullInt64{Int64: 1},
+					ToWalletID:     sql.NullInt64{Int64: 1},
 					Amount:       "100",
 					Currency:     "USD",
 					Type:         types.TransferType,
@@ -210,7 +210,7 @@ func TestServiceImpl_Transfer(t *testing.T) {
 				m := &infra_mocks.Repository{}
 				m.On("Create", mock.Anything, types.TransDAO{
 					FromWalletID: sql.NullInt64{Int64: 1},
-					ToCardID:     sql.NullInt64{Int64: 1},
+					ToWalletID:     sql.NullInt64{Int64: 1},
 					Amount:       "100",
 					Currency:     "USD",
 					Type:         types.TransferType,
@@ -230,7 +230,7 @@ func TestServiceImpl_Transfer(t *testing.T) {
 				m := &infra_mocks.Repository{}
 				m.On("Create", mock.Anything, types.TransDAO{
 					FromWalletID: sql.NullInt64{Int64: 1},
-					ToCardID:     sql.NullInt64{Int64: 1},
+					ToWalletID:     sql.NullInt64{Int64: 1},
 					Amount:       "100",
 					Currency:     "USD",
 					Type:         types.TransferType,

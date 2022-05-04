@@ -51,7 +51,7 @@ func main()  {
 	withdrawConsumer := NewConsumer(withdrawChannel, buildWithdrawHandler(transDB, walletDB))
 
 	walletRepo := infra.NewRepository(walletDB)
-	transactionService := buildTransactionService(conf.TransactionDatasource, walletRepo, publisher)
+	transactionService := buildTransactionService(conf.TransactionDatasource, publisher)
 	walletService := service.NewService(walletRepo, transactionService)
 
 	transferConsumer.Run(context.Background())
@@ -62,7 +62,7 @@ func main()  {
 	startServer(walletService)
 }
 
-func buildTransactionService(datasource string, walletRepo service3.WalletRepository, publisher service3.Publisher) service3.Service {
+func buildTransactionService(datasource string, publisher service3.Publisher) service3.Service {
 	transDB, err := sqlx.Connect("mysql", datasource)
 	if err != nil {
 		panic(err)
