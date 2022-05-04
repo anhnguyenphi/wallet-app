@@ -171,7 +171,7 @@ different instances of the same interface, so we can reuse code and support test
 ### Improvement
 - Improve test coverage
 - Have integration test
-- When two phases commit have a few drawbacks, we should find another solution to handle distributed transaction.
+- Develop two phases commit coordinator to make sure all the transaction commit or rollback. 
 - Have better solution verify third party transaction, for example long pooling
 - Store third party transaction history
 
