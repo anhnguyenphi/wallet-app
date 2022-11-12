@@ -1,9 +1,5 @@
 # Wallet app
 
-## Assumption/Scope
-Because I don't have much experience with blockchain wallet,
-so the scope of wallet app is E-wallet app, where we can deposit/withdraw money from
-bank to our app and transfer money between E-wallet users.
 
 ## Requirement
 
